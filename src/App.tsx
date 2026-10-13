@@ -12,6 +12,304 @@ function Fejlec() {
   )
 }
 
+function Calculator() {
+  const [elsoSzam, setElsoSzam] = useState('')
+  const [masodikSzam, setMasodikSzam] = useState('')
+  const [muvelet, setMuvelet] = useState('+')
+  const [eredmeny, setEredmeny] = useState<number | null>(null)
+  const [hiba, setHiba] = useState('')
+
+  function szamol() {
+    const a = Number(elsoSzam)
+    const b = Number(masodikSzam)
+
+    if (
+      elsoSzam.trim() === '' ||
+      masodikSzam.trim() === '' ||
+      !Number.isFinite(a) ||
+      !Number.isFinite(b)
+    ) {
+      setHiba('Kérlek, adj meg két érvényes számot!')
+      setEredmeny(null)
+      return
+    }
+
+    if (muvelet === '/' && b === 0) {
+      setHiba('Nullával nem lehet osztani!')
+      setEredmeny(null)
+      return
+    }
+
+    let eredmenySzam = 0
+
+    switch (muvelet) {
+      case '+':
+        eredmenySzam = a + b
+        break
+      case '-':
+        eredmenySzam = a - b
+        break
+      case '*':
+        eredmenySzam = a * b
+        break
+      case '/':
+        eredmenySzam = a / b
+        break
+    }
+
+    setEredmeny(eredmenySzam)
+    setHiba('')
+  }
+
+  return (
+    <div className="card shadow border-0 h-100">
+      <div className="card-body p-4 p-md-5">
+        <h2 className="card-title text-center mb-4">
+          Egyszerű számológép
+        </h2>
+
+        <div className="mb-3">
+          <label htmlFor="elsoSzam" className="form-label">
+            Első szám
+          </label>
+          <input
+            id="elsoSzam"
+            type="number"
+            className="form-control"
+            value={elsoSzam}
+            onChange={(e) => setElsoSzam(e.target.value)}
+            placeholder="Add meg az első számot"
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="muvelet" className="form-label">
+            Művelet
+          </label>
+          <select
+            id="muvelet"
+            className="form-select"
+            value={muvelet}
+            onChange={(e) => setMuvelet(e.target.value)}
+          >
+            <option value="+">Összeadás (+)</option>
+            <option value="-">Kivonás (-)</option>
+            <option value="*">Szorzás (×)</option>
+            <option value="/">Osztás (÷)</option>
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="masodikSzam" className="form-label">
+            Második szám
+          </label>
+          <input
+            id="masodikSzam"
+            type="number"
+            className="form-control"
+            value={masodikSzam}
+            onChange={(e) => setMasodikSzam(e.target.value)}
+            placeholder="Add meg a második számot"
+          />
+        </div>
+
+        <button
+          className="btn btn-primary btn-lg w-100"
+          onClick={szamol}
+        >
+          Számolás
+        </button>
+
+        {hiba !== '' && (
+          <div className="alert alert-danger mt-4 mb-0" role="alert">
+            {hiba}
+          </div>
+        )}
+
+        {eredmeny !== null && hiba === '' && (
+          <div className="alert alert-success mt-4 mb-0 text-center">
+            <h3 className="h5">Eredmény</h3>
+            <p className="fs-2 fw-bold mb-0">{eredmeny}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function GrafikusCalculator() {
+  const [kijelzo, setKijelzo] = useState('0')
+  const [elsoErtek, setElsoErtek] = useState<number | null>(null)
+  const [muvelet, setMuvelet] = useState<string | null>(null)
+  const [ujSzam, setUjSzam] = useState(false)
+  const [hiba, setHiba] = useState('')
+
+  function torles() {
+    setKijelzo('0')
+    setElsoErtek(null)
+    setMuvelet(null)
+    setUjSzam(false)
+    setHiba('')
+  }
+
+  function szamGomb(szam: string) {
+    setHiba('')
+
+    if (ujSzam || kijelzo === '0' || kijelzo === 'Hiba') {
+      setKijelzo(szam)
+      setUjSzam(false)
+    } else {
+      setKijelzo(kijelzo + szam)
+    }
+  }
+
+  function tizedes() {
+    setHiba('')
+
+    if (ujSzam || kijelzo === 'Hiba') {
+      setKijelzo('0.')
+      setUjSzam(false)
+    } else if (!kijelzo.includes('.')) {
+      setKijelzo(kijelzo + '.')
+    }
+  }
+
+  function muveletValasztas(kivalasztott: string) {
+    setHiba('')
+    setElsoErtek(Number(kijelzo))
+    setMuvelet(kivalasztott)
+    setUjSzam(true)
+  }
+
+  function szamitas() {
+    if (elsoErtek === null || muvelet === null) return
+
+    const masodikErtek = Number(kijelzo)
+    let eredmeny = 0
+
+    switch (muvelet) {
+      case '+':
+        eredmeny = elsoErtek + masodikErtek
+        break
+      case '-':
+        eredmeny = elsoErtek - masodikErtek
+        break
+      case '*':
+        eredmeny = elsoErtek * masodikErtek
+        break
+      case '/':
+        if (masodikErtek === 0) {
+          setHiba('Nullával nem lehet osztani!')
+          setKijelzo('Hiba')
+          setElsoErtek(null)
+          setMuvelet(null)
+          setUjSzam(true)
+          return
+        }
+        eredmeny = elsoErtek / masodikErtek
+        break
+    }
+
+    setKijelzo(String(Number(eredmeny.toFixed(10))))
+    setElsoErtek(null)
+    setMuvelet(null)
+    setUjSzam(true)
+    setHiba('')
+  }
+
+  const gombok = [
+    { szoveg: '7', tipus: 'szam' },
+    { szoveg: '8', tipus: 'szam' },
+    { szoveg: '9', tipus: 'szam' },
+    { szoveg: '÷', tipus: 'muvelet', ertek: '/' },
+    { szoveg: '4', tipus: 'szam' },
+    { szoveg: '5', tipus: 'szam' },
+    { szoveg: '6', tipus: 'szam' },
+    { szoveg: '×', tipus: 'muvelet', ertek: '*' },
+    { szoveg: '1', tipus: 'szam' },
+    { szoveg: '2', tipus: 'szam' },
+    { szoveg: '3', tipus: 'szam' },
+    { szoveg: '−', tipus: 'muvelet', ertek: '-' },
+    { szoveg: '0', tipus: 'szam' },
+    { szoveg: '.', tipus: 'tizedes' },
+    { szoveg: '=', tipus: 'egyenlo' },
+    { szoveg: '+', tipus: 'muvelet', ertek: '+' },
+  ]
+
+  return (
+    <div className="card shadow border-0 h-100">
+      <div className="card-body p-4">
+        <h2 className="card-title text-center mb-4">
+          Grafikus számológép
+        </h2>
+
+        <div
+          className="bg-dark text-white rounded p-3 mb-3 text-end"
+          style={{ minHeight: '85px', overflowWrap: 'anywhere' }}
+        >
+          <div className="text-secondary small mb-1">
+            {elsoErtek !== null && muvelet !== null
+              ? `${elsoErtek} ${
+                  muvelet === '*'
+                    ? '×'
+                    : muvelet === '/'
+                      ? '÷'
+                      : muvelet
+                }`
+              : ' '}
+          </div>
+          <div className="fs-2 fw-bold">{kijelzo}</div>
+        </div>
+
+        <button
+          className="btn btn-danger w-100 mb-3"
+          onClick={torles}
+        >
+          C – Törlés
+        </button>
+
+        <div className="row g-2">
+          {gombok.map((gomb, index) => (
+            <div className="col-3" key={index}>
+              <button
+                className={`btn w-100 py-3 ${
+                  gomb.tipus === 'muvelet'
+                    ? 'btn-warning'
+                    : gomb.tipus === 'egyenlo'
+                      ? 'btn-success'
+                      : 'btn-outline-secondary'
+                }`}
+                onClick={() => {
+                  if (gomb.tipus === 'szam') {
+                    szamGomb(gomb.szoveg)
+                  } else if (gomb.tipus === 'tizedes') {
+                    tizedes()
+                  } else if (
+                    gomb.tipus === 'muvelet' &&
+                    'ertek' in gomb
+                  ) {
+                    muveletValasztas(gomb.ertek)
+                  } else if (gomb.tipus === 'egyenlo') {
+                    szamitas()
+                  }
+                }}
+              >
+                {gomb.szoveg}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {hiba !== '' && (
+          <div className="alert alert-danger mt-3 mb-0">
+            {hiba}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function Izzokapcsolo() {
   const [beKapcsolva, setBeKapcsolva] = useState(false)
 
@@ -189,6 +487,18 @@ function App() {
       <Fejlec />
 
       <main className="container py-5">
+        <div className="row g-4">
+          <div className="col-12 col-lg-6">
+            <Calculator />
+          </div>
+
+          <div className="col-12 col-lg-6">
+            <GrafikusCalculator />
+          </div>
+        </div>
+      </main>
+
+      <main className="container pb-5">
         <div className="row g-4">
           <div className="col-12 col-lg-6">
             <Izzokapcsolo />
